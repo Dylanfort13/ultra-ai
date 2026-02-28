@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultra_AI Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#09090b;--s:#111113;--s2:#18181b;--b:#27272a;--b2:#3f3f46;--t:#fafafa;--t2:#a1a1aa;--t3:#52525b;--t4:#3f3f46;--p0:#a78bfa;--p1:#f87171;--p2:#fbbf24;--p3:#34d399;--cyan:#22d3ee}
+*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--t);font-family:'Outfit',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--b);border-radius:3px}
+textarea,input,select{font-family:inherit}a{color:var(--cyan)}
+
+/* NAV */
+.tabs{position:sticky;top:0;z-index:100;background:rgba(9,9,11,0.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--b);padding:8px 16px;display:flex;align-items:center;gap:3px;overflow-x:auto}
+.tabs::-webkit-scrollbar{height:0}
+.logo{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-right:8px;flex-shrink:0}
+.tab{padding:6px 12px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--t3);font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.tab:hover{color:var(--t2);background:var(--s)}.tab.on{background:var(--t);color:var(--bg);font-weight:600}
+.sync-area{margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.sync-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.gear-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--b);background:transparent;color:var(--t3);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit}
+.gear-btn:hover{border-color:var(--t3);color:var(--t2)}
+
+/* VIEWS */
+.view{display:none;padding:20px 24px;max-width:1200px;margin:0 auto}.view.on{display:block;animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+.hero{display:grid;grid-template-columns:1fr 200px;gap:14px;margin-bottom:18px}
+.today{background:linear-gradient(135deg,#0f172a,#1e1b4b 60%,#312e81);border:1px solid #3730a3;border-radius:14px;padding:22px 26px;position:relative;overflow:hidden}
+.today::after{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;background:radial-gradient(circle,rgba(99,102,241,.12),transparent 70%);border-radius:50%}
+.today-sup{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#818cf8;margin-bottom:3px;position:relative}
+.today-step{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:800;color:#e0e7ff;line-height:1;margin-bottom:3px;position:relative}
+.today-focus{font-size:14px;font-weight:500;color:#c7d2fe;line-height:1.4;margin-bottom:8px;position:relative}
+.today-phase{display:inline-block;background:#4f46e520;border:1px solid #4f46e540;color:#a5b4fc;padding:3px 11px;border-radius:20px;font-size:10px;font-weight:600;position:relative}
+.today-mot{font-size:11px;color:#818cf8;margin-top:8px;position:relative;font-style:italic}
+
+/* RING */
+.ring-card{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-wrap{position:relative;width:110px;height:110px;margin-bottom:4px}
+.ring-wrap svg{width:110px;height:110px;transform:rotate(-90deg)}
+.ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.ring-pct{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:800;display:block}
+.ring-sub{font-size:9px;color:var(--t3)}.ring-detail{font-size:10px;color:var(--t2)}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:12px 14px}
+.stat-v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1;margin-bottom:2px}
+.stat-l{font-size:9px;color:var(--t3);font-weight:500}
+
+/* PHASES */
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.ph{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:14px;position:relative;overflow:hidden}
+.ph.now{border-color:#4f46e560}
+.ph-now{position:absolute;top:6px;right:6px;font-size:8px;font-weight:700;background:#4f46e530;color:#a5b4fc;padding:2px 6px;border-radius:3px}
+.ph-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.ph-title{font-size:12px;font-weight:600;margin-bottom:5px}
+.ph-bar{height:3px;background:var(--b);border-radius:2px;overflow:hidden;margin-bottom:3px}
+.ph-fill{height:100%;border-radius:2px;transition:width .5s}.ph-count{font-size:9px;color:var(--t3)}
+
+/* SEC */
+.sec{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--t3)}
+.sec span{flex:1;height:1px;background:var(--b)}
+
+/* NAV GRID */
+.nav-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:24px}
+.nav-card{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s}
+.nav-card:hover{border-color:var(--t4);transform:translateY(-1px)}
+.nav-icon{font-size:22px;display:block;margin-bottom:4px}
+.nav-name{font-size:11px;font-weight:600;margin-bottom:1px}.nav-desc{font-size:9px;color:var(--t3)}
+
+/* PIPELINE */
+.pipe-row{display:flex;gap:2px;border-radius:8px;overflow:hidden}
+.pipe{flex:1;padding:9px 2px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.pipe:hover{filter:brightness(1.3)}
+.pipe-n{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;margin-bottom:1px}
+.pipe-l{font-size:6px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;opacity:.85}
+.pipe-d{width:5px;height:5px;border-radius:50%;margin:3px auto 0}
+.pipe-hint{font-size:9px;color:var(--t4);margin-top:4px;text-align:center}
+.pipe-tooltip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#1c1c1e;border:1px solid var(--b2);border-radius:7px;padding:9px 12px;min-width:180px;z-index:50;pointer-events:none;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+
+/* STEP ROWS */
+.step-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:8px;background:var(--s);border:1px solid var(--b);border-radius:8px;padding:7px 12px;margin-bottom:3px;transition:all .15s;cursor:pointer}
+.step-row:hover{border-color:var(--b2)}.step-row.active{border-color:#4f46e560;background:#1e1b4b15}
+.step-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--t3);text-align:center}
+.step-type{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:1px 4px;border-radius:3px;display:inline-block;margin-left:4px}
+
+/* STEP EXPAND */
+.step-expand{background:var(--bg);border:1px solid var(--b);border-top:none;border-radius:0 0 8px 8px;padding:12px 16px;margin-top:-4px;margin-bottom:3px;animation:up .2s}
+.step-expand textarea{width:100%;min-height:70px;padding:8px;border-radius:7px;border:1px solid var(--b);background:var(--s);color:var(--t);font-size:12px;line-height:1.6;resize:vertical}
+.step-expand textarea:focus{outline:none;border-color:var(--cyan)}
+.done-def{font-size:10px;color:var(--t3);background:var(--s);border:1px solid var(--b);border-radius:6px;padding:7px 10px;margin-top:6px}
+
+/* BADGES */
+.badge-wrap{position:relative;display:inline-block}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:8px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;border:none;font-family:inherit;transition:all .15s}
+.badge:hover{filter:brightness(1.2)}
+.dd{position:absolute;top:100%;right:0;margin-top:3px;z-index:999;background:#1c1c1e;border:1px solid var(--b);border-radius:7px;padding:3px;min-width:145px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.dd-item{display:block;width:100%;text-align:left;padding:6px 10px;border:none;border-radius:5px;background:transparent;font-size:11px;cursor:pointer;font-family:inherit;color:var(--t2)}
+.dd-item:hover{background:#27272a}
+
+/* TRACKER */
+.trk-head{display:grid;grid-template-columns:45px 60px 1fr 80px;background:var(--s);border-bottom:1px solid var(--b);padding:7px 12px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3)}
+.trk-row{display:grid;grid-template-columns:45px 60px 1fr 80px;align-items:center;padding:7px 12px;border-bottom:1px solid #ffffff08;cursor:pointer}
+.trk-row:hover{background:#ffffff04}.trk-row.cur{background:#1e1b4b10}
+.trk-filter{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.trk-search{padding:6px 10px;border-radius:7px;border:1px solid var(--b);background:var(--s);color:var(--t);font-size:11px;width:180px}
+.trk-search:focus{outline:none;border-color:var(--cyan)}
+.fbtn{padding:3px 8px;border-radius:5px;border:1px solid var(--b);background:transparent;color:var(--t3);font-size:9px;font-weight:600;cursor:pointer}
+.fbtn:hover,.fbtn.on{background:var(--s);color:var(--t2);border-color:var(--b2)}
+
+/* ZOOM */
+.rp-phase{margin-bottom:24px;padding-left:24px;position:relative}
+.rp-phase::before{content:'';position:absolute;left:9px;top:26px;bottom:0;width:2px;background:var(--b)}
+.rp-phase:last-of-type::before{display:none}
+.rp-dot{width:18px;height:18px;border-radius:50%;position:absolute;left:-24px;top:2px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--bg)}
+.rp-tag{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:4px}
+.rp-title{font-size:16px;font-weight:700}
+.rp-why{font-size:11px;color:var(--t2);line-height:1.7;margin-bottom:12px;max-width:680px}
+.rp-success{margin-top:10px;padding:9px 14px;background:#05966910;border:1px solid #05966930;border-radius:8px;font-size:11px;color:#34d399}
+.zo-mission{background:linear-gradient(135deg,#0f172a,#1e1b4b 50%,#312e81);border:1px solid #3730a3;border-radius:14px;padding:22px 26px;margin-bottom:20px}
+.zo-flow{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:12px 16px;margin-bottom:24px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.zo-chip{background:var(--bg);border:1px solid var(--b);border-radius:5px;padding:4px 10px;font-size:11px;color:var(--t2);font-weight:500}
+.zo-arrow{color:var(--t4);font-size:13px}
+.zo-note{font-size:10px;color:var(--t3);margin-top:5px;width:100%}
+.remember{background:#17B26A10;border:1px solid #17B26A25;border-radius:10px;padding:16px 20px;margin-top:12px}
+
+/* SKILL TREE */
+.st-col{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:14px;min-height:180px}
+.st-col h3{font-size:12px;font-weight:700;margin-bottom:8px}
+.st-item{background:var(--bg);border:1px solid var(--b);border-radius:6px;padding:6px 10px;margin-bottom:4px;font-size:11px;color:var(--t2);display:flex;align-items:center;gap:6px}
+.st-item .xb{margin-left:auto;background:none;border:none;color:var(--t4);cursor:pointer;font-size:13px;padding:0 3px}
+.st-item .xb:hover{color:var(--p1)}
+.st-add{display:flex;gap:5px;margin-top:6px}
+.st-add input{flex:1;padding:6px 8px;border-radius:5px;border:1px solid var(--b);background:var(--bg);color:var(--t);font-size:11px}
+.st-add input:focus{outline:none;border-color:var(--cyan)}
+.st-add button{padding:6px 12px;border-radius:5px;border:none;background:var(--cyan);color:var(--bg);font-size:10px;font-weight:700;cursor:pointer}
+
+/* CARDS for library items */
+.lib-card{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:14px;margin-bottom:8px;position:relative}
+.lib-card h4{font-size:13px;font-weight:600;margin-bottom:6px;color:var(--t)}
+.lib-card p{font-size:11px;color:var(--t2);line-height:1.5}
+.lib-card .lib-meta{font-size:9px;color:var(--t4);margin-top:6px;font-family:'JetBrains Mono',monospace}
+.lib-card .lib-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px}
+.lib-card .lib-actions button{background:none;border:1px solid var(--b);border-radius:4px;color:var(--t3);cursor:pointer;padding:3px 7px;font-size:10px}
+.lib-card .lib-actions button:hover{border-color:var(--t3);color:var(--t2)}
+.lib-add-form{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:14px;margin-bottom:12px}
+.lib-input{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--b);background:var(--bg);color:var(--t);font-size:12px;margin-bottom:6px}
+.lib-input:focus{outline:none;border-color:var(--cyan)}
+.lib-textarea{width:100%;min-height:80px;padding:8px 10px;border-radius:6px;border:1px solid var(--b);background:var(--bg);color:var(--t);font-size:12px;line-height:1.5;resize:vertical;margin-bottom:6px}
+.lib-textarea:focus{outline:none;border-color:var(--cyan)}
+
+/* BRIEF */
+.brief-box{background:var(--bg);border:1px solid var(--b);border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);line-height:1.7;white-space:pre-wrap;max-height:500px;overflow-y:auto;margin-bottom:10px;cursor:text;user-select:all}
+.brief-btn{padding:8px 20px;border-radius:7px;border:none;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+
+/* AI JOURNAL */
+.aj-entry{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:14px;margin-bottom:8px}
+.aj-date{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:3px}
+.aj-author{font-size:10px;font-weight:700;color:var(--cyan);margin-bottom:4px}
+.aj-text{font-size:12px;color:var(--t2);line-height:1.6;white-space:pre-wrap}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center}
+.overlay.on{display:flex}
+.modal{background:var(--s);border:1px solid var(--b);border-radius:14px;padding:22px;width:440px;max-width:92vw;max-height:85vh;overflow-y:auto}
+.modal h2{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.modal h2 button{background:none;border:none;color:var(--t3);font-size:18px;cursor:pointer;padding:0;line-height:1}
+.modal-section{margin-bottom:14px}
+.modal-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:5px}
+.modal-note{font-size:9px;color:var(--t4);line-height:1.5;margin-top:3px}
+.mbtn{padding:8px 16px;border-radius:7px;border:none;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;width:100%;margin-bottom:5px}
+.mbtn:hover{filter:brightness(1.1)}
+.mbtn.sec{background:var(--s2);color:var(--t2);border:1px solid var(--b)}
+.mbtn.danger{background:#7f1d1d;color:#fca5a5}
+.mbtn.primary{background:var(--cyan);color:var(--bg)}
+.modal-input{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--b);background:var(--bg);color:var(--t);font-family:'JetBrains Mono',monospace;font-size:10px;margin-bottom:5px}
+.modal-input:focus{outline:none;border-color:var(--cyan)}
+.copy-area{width:100%;padding:7px;border-radius:6px;border:1px solid var(--b);background:var(--bg);color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:8px;word-break:break-all;line-height:1.5;margin-bottom:3px;cursor:pointer;max-height:50px;overflow:auto}
+
+/* CONFETTI */
+@keyframes cf{0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.cf{position:fixed;top:-10px;z-index:300;animation:cf 2.5s ease-in forwards;border-radius:2px}
+.celeb{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--s);border:2px solid var(--cyan);border-radius:14px;padding:28px;text-align:center;z-index:250;animation:up .3s;box-shadow:0 0 60px rgba(34,211,238,.15)}
+.celeb h3{font-size:20px;font-weight:800;margin-bottom:6px}.celeb p{font-size:13px;color:var(--t2)}
+
+/* SUBTABS */
+.subtabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.subtab{padding:5px 12px;border-radius:6px;border:1px solid var(--b);background:transparent;color:var(--t3);font-size:10px;font-weight:600;cursor:pointer}
+.subtab:hover{color:var(--t2);background:var(--s)}.subtab.on{background:var(--s2);color:var(--t);border-color:var(--b2)}
+
+/* RESPONSIVE */
+@media(max-width:800px){
+.hero{grid-template-columns:1fr}.stats,.phases,.nav-grid{grid-template-columns:repeat(2,1fr)!important}
+.trk-head,.trk-row{grid-template-columns:35px 50px 1fr 65px!important}
+.pipe-row{flex-wrap:wrap}.pipe{min-width:48px;padding:7px 2px!important}
+.view{padding:14px 12px}.st-grid{grid-template-columns:1fr!important}
+}
+</style>
+</head>
+<body>
+
+<div class="tabs">
+<div class="logo">ULTRA_AI</div>
+<button class="tab on" data-view="dashboard" onclick="go('dashboard')">⚡ Home</button>
+<button class="tab" data-view="zoom" onclick="go('zoom')">🔭 Roadmap</button>
+<button class="tab" data-view="tracker" onclick="go('tracker')">🧠 Tracker</button>
+<button class="tab" data-view="skills" onclick="go('skills')">🧬 Skills</button>
+<button class="tab" data-view="library" onclick="go('library')">📚 Library</button>
+<button class="tab" data-view="blueprint" onclick="go('blueprint')">🤖 Blueprint</button>
+<button class="tab" data-view="journal" onclick="go('journal')">📓 Journal</button>
+<button class="tab" data-view="brief" onclick="go('brief')">🔮 Brief AI</button>
+<div class="sync-area">
+<span id="syncInd" style="display:flex;align-items:center;gap:3px;font-size:9px;color:var(--t4)"><span class="sync-dot" style="background:var(--t4)"></span>Local</span>
+<button class="gear-btn" onclick="openSettings()">⚙️</button>
+</div>
+</div>
+
+<div id="dashboard" class="view on"></div>
+<div id="zoom" class="view"></div>
+<div id="tracker" class="view"></div>
+<div id="skills" class="view"></div>
+<div id="library" class="view"></div>
+<div id="blueprint" class="view"></div>
+<div id="journal" class="view"></div>
+<div id="brief" class="view"></div>
+
+<div class="overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()"><div class="modal" id="settingsModal"></div></div>
+
+<script>
+// ===== STEP DATA =====
+const STEPS=[
+{s:1,f:"\u{1F4DA} Learn fundamentals: Git, GitHub, how devs ship code",p:0,type:"learn",done:"GitHub account with 1 repo, 1 file pushed.",desc:"Watch a beginner Git/GitHub tutorial (1-2h). Create your account, make a repo, push a file. You need this to host your dashboard and for Claude Code to work with your project later."},
+{s:2,f:"Map the skill tree \u2014 Concepts, Facts, Procedures",p:0,type:"build",done:"Skill tree with 10+ items per column.",desc:"Open the Skills tab and fill in three columns. Concepts = things to understand (how webhooks work, what API auth is). Facts = things to memorize (SPF record syntax, pricing tiers). Procedures = things to practice (building a site, writing a cold email sequence). This is your Ultralearning map \u2014 it tells you what to focus on."},
+{s:3,f:"Test 3 AI website builders \u2014 same site on each, pick winner",p:0,type:"build",done:"Comparison notes + winner chosen.",desc:"Pick 3 AI website builders (e.g. CodeDesign.ai, ZipWP, Durable, 10Web, Framer AI). Build the exact same fake roofing company site on all 3. Time yourself. Score each on speed, quality, customization, and pricing. Pick your winner \u2014 this is the tool you'll use for the next 55 steps."},
+{s:4,f:"Test 2 automation platforms \u2014 same workflow on each, pick winner",p:0,type:"build",done:"Comparison notes + winner chosen.",desc:"Test 2 automation platforms (e.g. Make.com, n8n, Zapier). Build the same simple workflow on both: 'When form is submitted \u2192 send email notification \u2192 log to spreadsheet.' Compare ease of use, pricing, flexibility. Pick your winner."},
+{s:5,f:"Set benchmarks + deploy dashboard to GitHub Pages",p:0,type:"build",done:"Benchmarks documented. Dashboard live at URL.",desc:"Write down your current numbers: How long does it take you to build a website? How many leads do you get per month? What's your close rate? What's your average revenue per client? These are your 'before' numbers. Then deploy this dashboard to GitHub Pages using the setup guide."},
+{s:"X",f:"\u{1F527} Mini project: AI news digest \u2014 newsletters \u2192 automation \u2192 AI summary \u2192 daily email",p:0,type:"build",done:"You receive your first automated AI news summary.",desc:"Your first real automation using the tools you just chose. Subscribe to 3-5 AI newsletters or RSS feeds. Build a workflow: trigger on new email/RSS item \u2192 extract content \u2192 send to AI for summary \u2192 compile into one daily/weekly digest email to yourself. You'll use this forever to stay current on AI tools."},
+{s:6,f:"Build fake site #1: Roofing company (5+ pages, form, SEO)",p:1,type:"build",done:"Complete site + 5+ saved prompts.",desc:"Build a full roofing company website with your chosen AI builder. Home, About, Services, Gallery, Contact \u2014 minimum 5 pages. Include a working contact form and basic SEO (meta titles, descriptions). Save every prompt that worked well to your Prompts library."},
+{s:7,f:"Build fake site #2: Manufacturing \u2014 beat your #1 time",p:1,type:"build",done:"Complete site. Time logged.",desc:"Same exercise, different industry. Build a manufacturing company site. The goal is to beat your time from Step 6. You're training speed and learning to adapt prompts across industries. Log your time to track improvement."},
+{s:8,f:"\u{1F4DA} Prompt engineering deep dive \u2014 rewrite 3 weakest prompts",p:1,type:"learn",done:"3 rewritten prompts with better output.",desc:"Spend 2-3 hours studying prompt engineering (Anthropic's docs, YouTube tutorials, examples). Then go back to your Prompts library, find your 3 worst-performing prompts, and rewrite them using what you learned. Compare before/after output quality."},
+{s:9,f:"\u{1F501} Drill: Speed run \u2014 new site, <90 min, no notes",p:1,type:"drill",done:"Site built. Time logged.",desc:"Ultralearning retrieval practice. Pick a random industry, set a 90-minute timer, and build a complete site from scratch WITHOUT looking at your SOP or notes. This forces your brain to recall the process. If you can't finish in time, that's valuable data about what you haven't internalized yet."},
+{s:10,f:"Write your Website-Building SOP",p:1,type:"build",done:"SOP someone else could follow.",desc:"Document your entire website-building process step-by-step in the SOPs section. Include: tool setup, prompt sequence, page-by-page workflow, quality checklist, delivery steps. Write it so clearly that someone with zero experience could follow it and produce a decent site."},
+{s:11,f:"\u{1F4CB} Weekly Review #1",p:1,type:"review",done:"Review written. 1+ adjustment made.",desc:"Go to Library \u2192 Weekly Reviews and write your first review. What went well this week? What's slower than expected? What tools are working? What needs to change? Make at least 1 concrete adjustment to your approach based on what you learned."},
+{s:12,f:"\u{1F4DA} Automation fundamentals \u2014 triggers, webhooks, conditions",p:1,type:"learn",done:"Can explain without notes.",desc:"Spend 2-3 hours learning core automation concepts. What are triggers, webhooks, HTTP requests, IF/ELSE conditions, error handling, and data mapping? Use your chosen platform's tutorials. Goal: you can explain each concept to someone without looking anything up."},
+{s:13,f:"Build first real business automation",p:1,type:"build",done:"Running in production.",desc:"Pick ONE repetitive task in your business (e.g. new inquiry notification, invoice follow-up, social media posting, lead logging) and automate it end-to-end. This must run in production on real data, not a test. Feel the difference between practice and production."},
+{s:14,f:"Build REAL client site #1",p:1,type:"build",done:"Delivered. Time vs benchmark logged.",desc:"Your first real client site using AI tools + your SOP. Follow your documented process. Time yourself from start to finish and compare against your Phase 0 benchmark. Take notes on every friction point \u2014 these feed your next SOP update."},
+{s:15,f:"Post-mortem + SOP update",p:1,type:"build",done:"SOP updated with 3+ improvements.",desc:"Review your real client build honestly. What took longer than expected? Where did the AI output need heavy editing? What steps were missing from your SOP? Update the SOP with at least 3 improvements. This iterative loop is how you get fast."},
+{s:16,f:"Build client-facing automation (booking/auto-response/reviews)",p:1,type:"build",done:"Live automation clients interact with.",desc:"Build an automation that your CLIENTS interact with. Examples: appointment booking system, automatic response to contact form submissions, post-project review request sequence. This proves you can sell automation as a service, not just use it internally."},
+{s:17,f:"\u{1F501} Drill: 45-min demo challenge \u2014 real prospect, no SOP",p:1,type:"drill",done:"Demo completed. Time logged.",desc:"Find a real prospect (or use a real company you'd target). Set a 45-minute timer. Build a personalized demo website for them from scratch \u2014 no SOP, no notes. This simulates the speed you'll need when a prospect says 'show me what you can do.'"},
+{s:18,f:"Build REAL client site #2 \u2014 include automation deliverable",p:1,type:"build",done:"Site + automation delivered.",desc:"Second real client site, but this time include at least one automation deliverable (booking, auto-response, review request). You're now delivering a website + automation package. Collect feedback from the client on both."},
+{s:19,f:"\u{1F4DA} Upgrade AI news automation + explore new tools",p:1,type:"learn",done:"Improved. 3 new tools noted.",desc:"Revisit your Step X news digest automation. Improve it (better summaries, better sources, add filtering). Also spend time exploring what new AI tools have launched since you started. The landscape moves fast \u2014 note 3 new tools/techniques in your journal."},
+{s:20,f:"\u2B50 Phase 1 Checkpoint",p:1,type:"checkpoint",done:"All metrics logged. Lessons written.",desc:"Measure everything against your Phase 0 benchmarks. How fast do you build sites now? How many have you delivered? What automations are running? Write a summary of Phase 1 lessons learned. This is your proof that the Ultralearning method works."},
+{s:21,f:"Map current lead gen process \u2014 mark \u{1F7E2}\u{1F7E1}\u{1F534} automation potential",p:2,type:"build",done:"Process map with color coding.",desc:"Draw out your entire lead generation process from 'finding a prospect' to 'booking a demo.' Color-code each step: \u{1F7E2} already automated, \u{1F7E1} could automate, \u{1F534} must stay manual. This map becomes your Phase 2 roadmap \u2014 you'll turn every \u{1F534} into \u{1F7E2}."},
+{s:22,f:"\u{1F4DA} Cold outreach fundamentals \u2014 SPF, DKIM, warming, compliance",p:2,type:"learn",done:"Can explain without notes.",desc:"Before sending a single cold email, learn the rules. Study SPF, DKIM, and DMARC (email authentication). Learn domain warming (why you can't blast 500 emails day one). Understand CAN-SPAM/CASL compliance. Getting this wrong means your emails go to spam forever."},
+{s:23,f:"Set up lead sourcing tool + pull 50 real leads",p:2,type:"build",done:"50 leads exported with enrichment.",desc:"Pick a lead sourcing tool (Apollo.io, Clay, PhantomBuster, etc.) and pull your first 50 real leads \u2014 US manufacturing/construction companies that need better websites. Export with enrichment data: company name, decision-maker, email, website URL, company size."},
+{s:24,f:"Build lead \u2192 enrichment pipeline with AI scoring",p:2,type:"build",done:"20+ leads auto-enriched.",desc:"Connect your lead source to your automation platform. Build a workflow: new lead \u2192 AI analyzes their current website \u2192 scores fit (1-10) \u2192 writes a personalized first line for outreach \u2192 categorizes by priority. Run 20+ leads through it."},
+{s:25,f:"\u{1F4CB} Weekly Review #2",p:2,type:"review",done:"Review written. Pipeline adjusted.",desc:"Review your lead gen progress. How many leads did you source? How's the enrichment quality? Are the AI-written personalized lines good enough? What needs tweaking in the pipeline? Adjust and document."},
+{s:26,f:"Set up cold email infrastructure + start warming",p:2,type:"build",done:"Domains warming. SPF/DKIM pass.",desc:"Buy 2-3 sending domains (variations of your main domain). Set up SPF/DKIM/DMARC records. Connect to your email sending tool (Instantly.ai, Smartlead, etc.). Start the warming process \u2014 this takes 1-2 weeks, so keep building other things while domains warm."},
+{s:27,f:"Write 5 cold email sequences with AI (15 emails)",p:2,type:"build",done:"5 sequences loaded.",desc:"Write 5 different cold email sequences (3 emails each = 15 total) using AI. Each sequence should test a different angle: pain point, social proof, direct offer, question-based, value-first. Load all into your email tool. Save the best prompts to your library."},
+{s:28,f:"Connect full pipeline: Leads \u2192 Enrich \u2192 Email",p:2,type:"build",done:"5 test leads flow automatically.",desc:"Wire everything together. When a new high-score lead enters your system, it should automatically get enriched, personalized, and enrolled in an email sequence \u2014 zero manual steps. Test with 5 leads end-to-end. Watch for errors and broken connections."},
+{s:29,f:"\u{1F680} Launch first automated outreach (20-30 leads)",p:2,type:"build",done:"Campaign live. Stats after 48h.",desc:"This is launch day. Send your first batch of 20-30 real outreach emails through your automated pipeline. Monitor deliverability, open rates, and reply rates after 48 hours. Don't panic if results are low \u2014 first campaigns are always for learning."},
+{s:30,f:"Build reply handling automation",p:2,type:"build",done:"Auto-categorized reply within 60s.",desc:"When someone replies to your cold email, build an automation that: detects the reply \u2192 sends it to AI for categorization (interested/not interested/question/out of office) \u2192 notifies you instantly for hot leads \u2192 logs everything. Goal: you know within 60 seconds when someone's interested."},
+{s:31,f:"\u{1F4CB} Weekly Review #3 \u2014 analyze results, kill losers",p:2,type:"review",done:"Top performer identified.",desc:"Deep dive into your campaign data. Which sequences have the best open/reply rates? Which have the worst? Kill the bottom 2 performers. Double down on what's working. Rewrite losing sequences with new angles."},
+{s:32,f:"Scale outreach to 50-100 leads",p:2,type:"build",done:"Deliverability stable.",desc:"Increase volume to 50-100 leads. Watch deliverability like a hawk \u2014 if bounce rates spike or open rates drop, slow down immediately. Set up alerts for deliverability issues. The goal is sustainable volume, not maximum volume."},
+{s:33,f:"\u{1F501} Drill: New niche pipeline from scratch, <2h",p:2,type:"drill",done:"Pipeline built. Time logged.",desc:"Ultralearning retrieval drill. Pick a completely new niche (e.g. dental clinics, real estate agents). Build an entire lead pipeline from zero \u2014 source leads, enrich, write sequences, connect automation \u2014 in under 2 hours. No copying from your existing pipeline. This proves you own the skill, not just the setup."},
+{s:34,f:"\u{1F4DA} AI voice fundamentals \u2014 research 3 platforms, pick winner",p:2,type:"learn",done:"Winner chosen with reasoning.",desc:"Research 3 AI voice platforms (Synthflow, Bland.ai, Retell AI, Vapi, etc.). Understand the concepts: text-to-speech quality, latency, conversation design, voice cloning, call recording. Compare pricing and features. Pick your winner for the next steps."},
+{s:35,f:"Build first AI cold call voice agent",p:2,type:"build",done:"60-second call to your phone.",desc:"Build your first AI voice agent that makes a cold call introduction. Script a natural 60-second conversation: greeting, who you are, why you're calling, interest check. Test it by having it call YOUR phone. Listen critically \u2014 does it sound natural? Would you stay on the line?"},
+{s:36,f:"\u{1F4CB} Weekly Review #4",p:2,type:"review",done:"Weakest link identified.",desc:"Review both email outreach results AND your first voice agent quality. What's the weakest link in your entire outreach system? Is it lead quality? Email copy? Voice naturalness? Pipeline reliability? Identify it and make a plan to fix it."},
+{s:37,f:"Connect voice agent to pipeline",p:2,type:"build",done:"Test event \u2192 call within 5 min.",desc:"Connect your voice agent to your automation pipeline. Build a trigger: when a lead shows interest (email reply, form submission, etc.) \u2192 automation fires \u2192 voice agent calls the lead within 5 minutes. Speed-to-lead is everything in sales."},
+{s:38,f:"Test AI voice on 5-10 real leads",p:2,type:"build",done:"Calls graded. 3+ improvements.",desc:"Let your AI voice agent call 5-10 real leads. Listen to every recording. Grade each call on: naturalness, handling of questions, conversation flow, outcome. Identify at least 3 specific improvements needed."},
+{s:39,f:"Iterate voice agent v2 \u2014 objection handling + personalization",p:2,type:"build",done:"V2 tested. Measurable improvement.",desc:"Rebuild your voice agent with the improvements from Step 38. Add objection handling (e.g. 'I'm not interested' \u2192 value prop pivot, 'Send me an email' \u2192 confirm address). Add personalization using lead data (company name, current website issues). Test again and measure improvement."},
+{s:40,f:"\u2B50 Phase 2 Checkpoint",p:2,type:"checkpoint",done:"All metrics logged. Scorecard updated.",desc:"Full measurement against benchmarks. Total leads contacted, response rates, calls made, demos booked. Score every component of your pipeline 1-10. Calculate: what's the cost per lead? Cost per demo? This data tells you if the system is profitable."},
+{s:41,f:"\u{1F4DA} Advanced automation \u2014 error handling, retries, APIs",p:3,type:"learn",done:"Error handling on 2+ workflows.",desc:"Level up your automation skills. Learn: error handling (what happens when a step fails?), retry logic (auto-retry 3x with backoff), sub-workflows (modular design), data transformation (formatting data between tools), API authentication. Add error handling to at least 2 existing workflows."},
+{s:42,f:"Build AI inbound receptionist",p:3,type:"build",done:"Full test call end-to-end.",desc:"Build a voice agent that answers your business phone 24/7. It should: greet callers naturally, identify what they need, qualify them (budget, timeline, project type), book an appointment if qualified, send you a summary. Test the full flow by calling it yourself."},
+{s:43,f:"Build client support chatbot",p:3,type:"build",done:"Handles 5+ FAQs on test site.",desc:"Build an AI chatbot that goes on client websites after delivery. It should handle: FAQ responses (5+ topics), collect visitor info, answer basic questions about the business, and escalate complex issues to you. Deploy it on a test site."},
+{s:44,f:"\u{1F4CB} Weekly Review #5 \u2014 audit automations",p:3,type:"review",done:"'Still manual' list prioritized.",desc:"Audit every automation you've built. Which ones have broken? Which saved the most time? What tasks are you STILL doing manually that could be automated? Create a prioritized 'still manual' list and tackle the highest-impact items first."},
+{s:45,f:"Build full voice loop: call \u2192 log \u2192 email \u2192 retry \u2192 book",p:3,type:"build",done:"Loop runs for 5 test leads.",desc:"Build the complete outbound voice loop: AI calls lead \u2192 logs result \u2192 if no answer, sends email \u2192 retries call after 48h \u2192 if interested, books demo \u2192 notifies you. Run 5 test leads through the complete loop with zero manual intervention."},
+{s:46,f:"Build automated proposal/demo generation",p:3,type:"build",done:"Demo URL + proposal within 30 min.",desc:"When a lead is qualified, trigger an automation that: generates a personalized demo website using their company info \u2192 drafts a proposal email with pricing \u2192 packages everything into a ready-to-send format. Goal: qualified lead to ready proposal in under 30 minutes."},
+{s:47,f:"\u{1F501} Drill: Rebuild best automation from memory",p:3,type:"drill",done:"Rebuilt. Time vs original logged.",desc:"Pick your most complex, best automation. Delete it (or build in a new workspace). Rebuild it entirely from memory \u2014 no looking at the original. Time yourself vs. how long the original took. This is Ultralearning retrieval practice at its best. Gaps in your recall = gaps in your understanding."},
+{s:48,f:"\u{1F4CB} Weekly Review #6 \u2014 ROI calculation",p:3,type:"review",done:"Revenue tied to automation.",desc:"Calculate the actual ROI of your automations. How much time are they saving? How much revenue can you directly tie to automated outreach? What's the cost of all your tools vs. the revenue generated? This number is your proof that the system works."},
+{s:49,f:"\u{1F4DA} AI trends \u2014 multi-agent, RAG, MCP, new models",p:3,type:"learn",done:"3 new techniques noted.",desc:"Spend 2-3 hours researching cutting-edge AI. Multi-agent systems (multiple AIs working together), RAG (retrieval-augmented generation for custom knowledge), function calling, MCP (model context protocol), new model releases. Note 3 techniques that could improve your system."},
+{s:50,f:"Build multi-step AI workflow (1 input \u2192 3+ outputs)",p:3,type:"build",done:"Runs end-to-end.",desc:"Build an advanced AI workflow where one input triggers multiple AI-generated outputs. Example: 'New qualified lead' \u2192 AI researches their company \u2192 AI writes personalized email copy \u2192 AI generates a demo site \u2192 AI drafts a proposal. One trigger, three+ AI outputs."},
+{s:51,f:"Price and package AI services \u2014 3 tiers + sales page",p:3,type:"build",done:"3 packages with pricing created.",desc:"Create 3 service tiers for FortX Web (e.g. Basic: website only, Pro: website + automation, Premium: website + automation + AI voice + support). Set pricing for each. Build a sales page or one-pager that communicates the value. This is how you sell what you've built."},
+{s:52,f:"\u{1F4DA} Review full system architecture + find vulnerabilities",p:3,type:"learn",done:"Diagram. 3+ vulnerabilities found.",desc:"Draw a complete diagram of every automation, tool, and connection in your system. Trace the flow from lead to client to upsell. Find at least 3 vulnerabilities: single points of failure, tools without backups, workflows with no error handling, manual bottlenecks."},
+{s:53,f:"Harden system + build daily health check",p:3,type:"build",done:"Health check sends daily status.",desc:"Fix every vulnerability from Step 52. Add monitoring: build a daily health check automation that tests each pipeline component and sends you a morning status report. If anything is broken, you know before your leads do."},
+{s:54,f:"\u{1F4CB} Weekly Review #7 \u2014 re-score skill tree",p:3,type:"review",done:"Skill tree re-scored. Gaps found.",desc:"Go back to your Phase 0 skill tree in the Skills tab. Re-score everything. What concepts do you now deeply understand? What facts are memorized? What procedures are automatic? Identify remaining gaps \u2014 these become your post-project learning priorities."},
+{s:55,f:"Build client onboarding flow",p:3,type:"build",done:"Full flow tested.",desc:"Build the complete automated client onboarding: client signs up \u2192 welcome email with next steps \u2192 questionnaire for project details \u2192 auto-create project in your system \u2192 schedule kickoff call \u2192 send preparation docs. Test the entire flow from fake signup to project creation."},
+{s:56,f:"\u{1F501} Drill: The 4-Hour Agency \u2014 full pipeline from fresh leads",p:3,type:"drill",done:"Everything that broke documented.",desc:"The ultimate test. In 4 hours: source 10 fresh leads in a new niche, enrich them, launch email + voice outreach, generate 3 demo sites, draft 3 proposals. Use your entire system under time pressure. Document EVERYTHING that breaks, slows down, or fails. This is the most valuable step in the entire project."},
+{s:57,f:"Fix everything from the 4-Hour Agency drill",p:3,type:"build",done:"All issues resolved.",desc:"Take every issue documented in Step 56 and fix it. Broken automation? Fix it. Slow step? Optimize it. Missing tool? Add it. This step turns your drill failures into system improvements. Re-test each fix to confirm it works."},
+{s:58,f:"Build upsell/retention automation",p:3,type:"build",done:"Sequence built. Test emails sent.",desc:"Build automated sequences for existing clients: check-in at 2 weeks (how's everything?), 1 month (review request), 3 months (upsell offer for additional services). For ads clients: monthly performance reports. This turns one-time sales into recurring revenue."},
+{s:59,f:"\u{1F4CB} Weekly Review #8 (Final)",p:3,type:"review",done:"Final review + 90-day plan.",desc:"The final review. Measure every metric against Phase 0 benchmarks. Write a full scorecard. Complete skills inventory. Answer: what would you do differently? What's working best? Draft a 90-day post-project plan for continued growth."},
+{s:60,f:"\u{1F3C6} PROJECT COMPLETE: Autonomous Agency Blueprint",p:3,type:"checkpoint",done:"You can explain your system in 5 min without notes.",desc:"Update the Blueprint tab with final status on every component. Write a 1-page 'State of FortX Web AI' document. The ultimate test: can you explain your entire system \u2014 from lead to upsell \u2014 in 5 minutes without any notes? If yes, you've internalized it. The machine is built."}
+];
+
+const PM=[
+{id:0,color:"#a78bfa",label:"Phase 0",title:"Metalearning"},
+{id:1,color:"#f87171",label:"Phase 1",title:"Build Faster"},
+{id:2,color:"#fbbf24",label:"Phase 2",title:"Lead Gen + Outreach"},
+{id:3,color:"#34d399",label:"Phase 3",title:"Autonomy + Mastery"}
+];
+const PD=[{n:"01",l:"Leads"},{n:"02",l:"Enrich"},{n:"03",l:"Email"},{n:"04",l:"Cold Call"},{n:"05",l:"Follow-up"},{n:"06",l:"Demo"},{n:"07",l:"Proposal"},{n:"08",l:"Build"},{n:"09",l:"Deliver"},{n:"10",l:"Recept."},{n:"11",l:"Support"},{n:"12",l:"Upsell"}];
+const PIPE_INFO=[
+"Lead Finding|Manual search|AI-sourced via lead tool + automation",
+"Lead Enrichment|Manual research|AI scoring + personalization",
+"Cold Email|Manual emails|Automated sequences",
+"AI Cold Calling|Manual calls|AI voice auto-dials",
+"AI Follow-up|Manual calls|AI triggers on events",
+"Demo Generation|Slow manual|AI builder (<45 min)",
+"Proposal & Close|Manual|AI-generated from lead data",
+"Website Build|8-15 hours|AI builder (<2 hours)",
+"Client Delivery|Manual emails|Automated onboarding",
+"AI Receptionist|None|AI voice inbound",
+"Support Chatbot|None|AI chatbot on sites",
+"Upsell Sequences|None|Automated email sequences"
+].map(s=>{const p=s.split("|");return{full:p[0],current:p[1],target:p[2]};});
+const PC={r:{bg:"#7f1d1d",t:"#fca5a5",d:"#f87171"},y:{bg:"#713f12",t:"#fde68a",d:"#fbbf24"},g:{bg:"#14532d",t:"#86efac",d:"#4ade80"}};
+const SC={todo:{bg:"#27272a30",t:"#71717a",l:"To Do"},active:{bg:"#818cf825",t:"#a5b4fc",l:"\u2190 Now"},done:{bg:"#4ade8020",t:"#4ade80",l:"Done"},skip:{bg:"#a1a1aa15",t:"#52525b",l:"Skip"}};
+const CY={r:"y",y:"g",g:"r"};
+const TC={learn:{bg:"#818cf820",t:"#a5b4fc",l:"\u{1F4DA}"},build:{bg:"#22d3ee15",t:"#22d3ee",l:"\u{1F527}"},drill:{bg:"#f8717115",t:"#f87171",l:"\u{1F501}"},review:{bg:"#fbbf2415",t:"#fbbf24",l:"\u{1F4CB}"},checkpoint:{bg:"#34d39915",t:"#34d399",l:"\u2B50"}};
+const WHYS=["Map the territory. 10% research prevents 50% wasted effort.","Website building is your #1 bottleneck. Learn by building real sites.","YOU are the bottleneck. AI scales outreach while you sleep.","Build a machine that runs without you. The 4-Hour Agency proves it."];
+const WINS=["Tools chosen, skill tree mapped, dashboard live.","Sites in <2h. SOP done. First automations running.","Full outreach pipeline automated. First campaign live.","System hardened. Health checks. Explain it all in 5 min."];
+const MOTS=[{m:5,t:"First steps. Don't rush Phase 0."},{m:15,t:"Every site gets faster."},{m:25,t:"Your SOP is your superpower."},{m:35,t:"Pipeline taking shape."},{m:45,t:"System becoming real."},{m:55,t:"Almost there."},{m:60,t:"Final stretch."},{m:999,t:"\u{1F3C6} Complete."}];
+
+// BLUEPRINT DATA
+const BP_STEPS=[
+{n:1,name:"Lead Discovery",desc:"AI sources leads matching your ICP from databases, LinkedIn, Google Maps. Enriches with company data, decision-maker info, tech stack.",icon:"\u{1F50D}"},
+{n:2,name:"Lead Scoring & Enrichment",desc:"AI scores each lead on fit (company size, industry, web presence quality). Writes personalized first lines. Categorizes priority.",icon:"\u{1F4CA}"},
+{n:3,name:"Cold Email Outreach",desc:"Automatically enrolls qualified leads into email sequences. A/B tests subject lines and CTAs. Monitors deliverability.",icon:"\u{1F4E7}"},
+{n:4,name:"AI Cold Calling",desc:"Voice AI agent calls leads with natural conversation. Qualifies interest. Handles basic objections. Logs call results.",icon:"\u{1F4DE}"},
+{n:5,name:"Follow-up Engine",desc:"Orchestrates multi-channel follow-up: email if no answer, retry call after 48h, LinkedIn connection. Never lets a lead go cold.",icon:"\u{1F504}"},
+{n:6,name:"Demo Generation",desc:"For interested leads, auto-generates a personalized demo website using AI builder + their company info. Ready to show in minutes.",icon:"\u{1F3A8}"},
+{n:7,name:"Proposal & Close",desc:"AI drafts a proposal with pricing, timeline, and demo link. Dylan reviews and sends. Eventually: AI sends with human approval.",icon:"\u{1F4DD}"},
+{n:8,name:"Website Build",desc:"AI builds the actual client website from SOP + prompt library. Dylan reviews and tweaks. Target: 2 hours per site.",icon:"\u{1F528}"},
+{n:9,name:"Client Delivery",desc:"Automated onboarding: welcome email, questionnaire, project timeline, training docs. Client goes from 'yes' to 'in progress' without Dylan.",icon:"\u{1F4E6}"},
+{n:10,name:"AI Receptionist",desc:"Inbound voice agent answers business phone 24/7. Qualifies callers, books appointments, sends Dylan a summary.",icon:"\u{1F399}\uFE0F"},
+{n:11,name:"Support Chatbot",desc:"AI chatbot on client websites handles FAQs, collects info, escalates complex issues to Dylan.",icon:"\u{1F4AC}"},
+{n:12,name:"Retention & Upsell",desc:"Automated check-ins at 2 weeks, 1 month, 3 months. Review requests. Upsell offers for additional services. Monthly reports for ads clients.",icon:"\u{1F4B0}"},
+{n:13,name:"System Health Monitor",desc:"Daily automated health check across all pipelines. Alerts if anything breaks. Performance dashboard.",icon:"\u{1F6E1}\uFE0F"}
+];
+
+// ===== STATE =====
+const DP=PD.map((_,i)=>i===5?"y":"r");
+let S={st:{},pi:[...DP],notes:{},timestamps:{},skillTree:{concepts:[],facts:[],procedures:[]},aiJournal:[],weeklyReviews:[],prompts:[],sops:[],toolLogins:[],claudeBrief:{lastContext:"",lastUpdated:"",suggestions:""}};
+let openDD=null,expandedStep=null,trkFilter="all",trkSearch="",libTab="prompts";
+
+// ===== PERSISTENCE =====
+function load(){try{const d=JSON.parse(localStorage.getItem("ultra_v3"));if(d&&d.st){S={...S,...d};}}catch(e){}}
+function save(){localStorage.setItem("ultra_v3",JSON.stringify(S));dbCloudSave();}
+let cst=null;
+function dbCloudSave(){clearTimeout(cst);cst=setTimeout(()=>cloudSave(),2000);updSync("saving");}
+
+function getT(){return localStorage.getItem("ultra-gh-token")||"";}
+function getG(){return localStorage.getItem("ultra-gist-id")||"";}
+async function cloudSave(){
+  const t=getT(),g=getG();if(!t||!g){updSync("local");return;}
+  try{await fetch("https://api.github.com/gists/"+g,{method:"PATCH",headers:{"Authorization":"token "+t,"Content-Type":"application/json"},body:JSON.stringify({files:{"ultra-ai-data.json":{content:JSON.stringify(S,null,2)}}})});updSync("synced");}catch(e){updSync("error");}
+}
+async function cloudLoad(){
+  const t=getT(),g=getG();if(!t||!g)return null;
+  try{const r=await fetch("https://api.github.com/gists/"+g,{headers:{"Authorization":"token "+t}});if(!r.ok)return null;const j=await r.json();const c=j.files["ultra-ai-data.json"];return c?JSON.parse(c.content):null;}catch(e){return null;}
+}
+async function createGist(t){
+  const r=await fetch("https://api.github.com/gists",{method:"POST",headers:{"Authorization":"token "+t,"Content-Type":"application/json"},body:JSON.stringify({description:"Ultra_AI Data",public:false,files:{"ultra-ai-data.json":{content:JSON.stringify(S,null,2)}}})});
+  if(!r.ok)throw new Error("Failed");return(await r.json()).id;
+}
+async function doConnect(){
+  const t=document.getElementById("st-tok").value.trim(),g=document.getElementById("st-gid").value.trim();
+  if(!t){alert("Paste token first");return;}
+  try{
+    localStorage.setItem("ultra-gh-token",t);
+    if(g){localStorage.setItem("ultra-gist-id",g);const cl=await cloudLoad();if(cl){const cd=Object.values(cl.st||{}).filter(v=>v==="done").length,ld=Object.values(S.st).filter(v=>v==="done").length;if(cd>=ld)S={...S,...cl};else await cloudSave();}}
+    else{const id=await createGist(t);localStorage.setItem("ultra-gist-id",id);}
+    updSync("synced");save();render();alert(g?"Connected! Data synced.":"Connected! Gist created.");openSettings();
+  }catch(e){alert("Failed: "+e.message);}
+}
+function updSync(s){const el=document.getElementById("syncInd");if(!el)return;const m={local:"var(--t4)|Local",saving:"var(--p2)|Saving...",synced:"var(--p3)|\u2601\uFE0F Synced",error:"var(--p1)|\u26A0\uFE0F Error"};const p=(m[s]||m.local).split("|");el.innerHTML='<span class="sync-dot" style="background:'+p[0]+'"></span>'+p[1];}
+
+// ===== STATE HELPERS =====
+function gS(n){return S.st[n]||"todo";}
+function sS(n,v){S.st[n]=v;if(!S.timestamps[n])S.timestamps[n]={};if(v==="active"&&!S.timestamps[n].started)S.timestamps[n].started=new Date().toISOString();if(v==="done"||v==="skip")S.timestamps[n].completed=new Date().toISOString();if(v==="todo")S.timestamps[n]={};openDD=null;save();const d=calc();if(v==="done"&&d.done%10===0&&d.done>0)celeb(d.done+" Steps!",d.pct+"% complete");PM.forEach(m=>{if(v==="done"&&STEPS.filter(s=>s.p===m.id).every(s=>gS(s.s)==="done"||gS(s.s)==="skip"))celeb(m.label+" Complete!",m.title);});render();}
+function togPipe(i){S.pi[i]=CY[S.pi[i]];save();render();}
+function setNote(n,t){S.notes[n]=t;save();}
+
+// ===== CALC =====
+function calc(){
+  let done=0,act=0,skip=0;STEPS.forEach(s=>{const st=gS(s.s);if(st==="done")done++;if(st==="active")act++;if(st==="skip")skip++;});
+  const tot=STEPS.length,rem=tot-done-skip,pct=Math.round(done/tot*100);
+  const cur=STEPS.find(s=>gS(s.s)==="active")||STEPS.find(s=>gS(s.s)==="todo")||STEPS[STEPS.length-1];
+  const pG=S.pi.filter(p=>p==="g").length,pY=S.pi.filter(p=>p==="y").length;
+  const auto=Math.round((pG+pY*.5)/12*100);
+  const sops=STEPS.filter(s=>s.f.toLowerCase().includes("sop")&&gS(s.s)==="done").length;
+  const ps=PM.map(m=>{const ss=STEPS.filter(s=>s.p===m.id),sd=ss.filter(s=>gS(s.s)==="done"||gS(s.s)==="skip").length;return{...m,total:ss.length,done:sd,pct:Math.round(sd/ss.length*100)};});
+  const mot=(MOTS.find(m=>done<=m.m)||MOTS[MOTS.length-1]).t;
+  return{done,act,skip,rem,pct,cur,auto,sops,ps,tot,mot};
+}
+function dn(n){return String(n)==="X"?"\u2726X":String(n).padStart(2,"0");}
+
+// ===== CELEBRATE =====
+function celeb(t,m){const cs=["#22d3ee","#a78bfa","#f87171","#fbbf24","#34d399"];for(let i=0;i<25;i++){const e=document.createElement("div");e.className="cf";e.style.cssText="left:"+Math.random()*100+"vw;width:"+(4+Math.random()*5)+"px;height:"+(4+Math.random()*5)+"px;background:"+cs[i%5]+";animation-delay:"+Math.random()*.7+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),3500);}const c=document.createElement("div");c.className="celeb";c.innerHTML="<h3>\u{1F389} "+t+"</h3><p>"+m+"</p>";document.body.appendChild(c);setTimeout(()=>c.remove(),3000);}
+
+// ===== COMPONENTS =====
+function badge(sn,ic){
+  const st=gS(sn),sc=SC[st],lb=st==="active"&&ic?"\u2190 Now":sc.l;
+  let h='<div class="badge-wrap"><button class="badge" style="background:'+sc.bg+';color:'+sc.t+'" onclick="event.stopPropagation();openDD=openDD===\''+sn+'\'?null:\''+sn+'\';render()">'+lb+'</button>';
+  if(openDD===String(sn)){h+='<div class="dd" onclick="event.stopPropagation()"><button class="dd-item" onclick="sS(\''+sn+'\',\'todo\')">⬜ Not Started</button><button class="dd-item" onclick="sS(\''+sn+'\',\'active\')">🔄 In Progress</button><button class="dd-item" onclick="sS(\''+sn+'\',\'done\')">✅ Done</button><button class="dd-item" onclick="sS(\''+sn+'\',\'skip\')">⏭️ Skipped</button></div>';}
+  return h+'</div>';
+}
+function tTag(type){const c=TC[type]||TC.build;return '<span class="step-type" style="background:'+c.bg+';color:'+c.t+'">'+c.l+'</span>';}
+function pipeH(){
+  const d=calc(),ac=d.auto<30?"#f87171":d.auto<70?"#fbbf24":"#4ade80";
+  let h='<div><div class="sec">Automation Pipeline <span></span><span style="flex:none;font-weight:600;color:'+ac+';letter-spacing:0">'+d.auto+'%</span></div><div class="pipe-row">';
+  for(let i=0;i<PD.length;i++){const p=PD[i],c=PC[S.pi[i]],pi=PIPE_INFO[i];h+='<div class="pipe" style="background:'+c.bg+';color:'+c.t+'" onclick="togPipe('+i+')" onmouseenter="pipeTip('+i+',this)" onmouseleave="pipeTipX(this)"><div class="pipe-n">'+p.n+'</div><div class="pipe-l">'+p.l+'</div><div class="pipe-d" style="background:'+c.d+'"></div></div>';}
+  return h+'</div><div class="pipe-hint">Click: \u{1F534}\u2192\u{1F7E1}\u2192\u{1F7E2} \u00B7 Hover for details</div></div>';
+}
+function pipeTip(i,el){const pi=PIPE_INFO[i],sl={r:"\u{1F534} Manual",y:"\u{1F7E1} Partial",g:"\u{1F7E2} Auto"}[S.pi[i]];const t=document.createElement("div");t.className="pipe-tooltip";t.innerHTML='<div style="font-size:11px;font-weight:600;margin-bottom:4px">'+pi.full+'</div><div style="font-size:9px;color:var(--t3)">'+sl+'</div><div style="font-size:9px;color:var(--t4);margin-top:3px">Now: '+pi.current+'</div><div style="font-size:9px;color:var(--cyan)">Target: '+pi.target+'</div>';el.appendChild(t);}
+function pipeTipX(el){const t=el.querySelector(".pipe-tooltip");if(t)t.remove();}
+
+function stepRow(s,showExp){
+  const st=gS(s.s),d=calc(),ic=String(s.s)===String(d.cur.s),ts=S.timestamps[s.s]||{},note=S.notes[s.s]||"";
+  let nPrev=note?'<div style="font-size:9px;color:var(--t4);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:350px">\u{1F4DD} '+esc(note.substring(0,55))+(note.length>55?"...":"")+'</div>':"";
+  let tsH=ts.started?'<div style="font-size:8px;color:var(--t4);font-family:JetBrains Mono,monospace">'+(ts.completed?"\u2705 "+ts.completed.slice(0,10):"\u{1F504} "+ts.started.slice(0,10))+'</div>':"";
+  let h='<div class="step-row'+(ic?" active":"")+'" onclick="expandedStep=expandedStep===\''+s.s+'\'?null:\''+s.s+'\';render()"><div class="step-num">'+dn(s.s)+'</div><div><div style="font-size:12px;font-weight:500;color:'+(st==="done"?"#52525b":"#fafafa")+';line-height:1.3;text-decoration:'+(st==="done"?"line-through":"none")+';opacity:'+(st==="skip"?.4:1)+'">'+s.f+tTag(s.type)+'</div>'+nPrev+tsH+'</div>'+badge(s.s,ic)+'</div>';
+  if(showExp&&expandedStep===String(s.s)){
+    h+='<div class="step-expand">';
+    if(s.desc)h+='<div style="font-size:11px;color:var(--t2);line-height:1.6;padding:10px 12px;background:var(--s);border:1px solid var(--b);border-radius:7px;margin-bottom:8px">'+s.desc+'</div>';
+    h+='<div style="font-size:10px;color:var(--t3);margin-bottom:4px">Notes for Step '+dn(s.s)+'</div><textarea placeholder="Notes, observations, links..." onblur="setNote(\''+s.s+'\',this.value)">'+esc(note)+'</textarea>';
+    if(s.done)h+='<div class="done-def">\u2705 <strong>Done =</strong> '+s.done+'</div>';
+    if(ts.started)h+='<div style="margin-top:4px;font-size:9px;color:var(--t4)">Started: '+new Date(ts.started).toLocaleString()+'</div>';
+    if(ts.completed)h+='<div style="font-size:9px;color:var(--p3)">Completed: '+new Date(ts.completed).toLocaleString()+'</div>';
+    h+='</div>';
+  }
+  return h;
+}
+function esc(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+// ===== RENDER: DASHBOARD =====
+function renderDash(){
+  const d=calc(),c=d.cur,pm=PM[c.p],rd=376.99,ro=rd-(rd*d.pct/100),ac=d.auto<30?"#f87171":d.auto<70?"#fbbf24":"#4ade80";
+  let h='<div class="hero"><div class="today"><div class="today-sup">Current Step</div><div class="today-step">Step '+dn(c.s)+'</div><div class="today-focus">'+c.f+'</div><div class="today-phase">'+pm.label+' \u00B7 '+pm.title+'</div><div class="today-mot">'+d.mot+'</div></div>';
+  h+='<div class="ring-card"><div class="ring-wrap"><svg viewBox="0 0 140 140"><defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient></defs><circle cx="70" cy="70" r="60" fill="none" stroke="#27272a" stroke-width="10"/><circle cx="70" cy="70" r="60" fill="none" stroke="url(#rg)" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+rd+'" stroke-dashoffset="'+ro+'" style="transition:stroke-dashoffset .8s"/></svg><div class="ring-center"><span class="ring-pct">'+d.pct+'%</span><span class="ring-sub">Complete</span></div></div><div class="ring-detail">'+d.done+' of '+d.tot+'</div></div></div>';
+  h+='<div class="stats"><div class="stat"><div class="stat-v" style="color:#22d3ee">'+d.done+'</div><div class="stat-l">Done</div></div><div class="stat"><div class="stat-v" style="color:#a78bfa">'+d.rem+'</div><div class="stat-l">Left</div></div><div class="stat"><div class="stat-v" style="color:'+ac+'">'+d.auto+'%</div><div class="stat-l">Autonomy</div></div><div class="stat"><div class="stat-v" style="color:#34d399">'+d.sops+'</div><div class="stat-l">SOPs</div></div></div>';
+  h+='<div class="phases">';
+  d.ps.forEach(function(p){const n=c.p===p.id;h+='<div class="ph'+(n?" now":"")+'" style="border-top:3px solid '+p.color+'">'+(n?'<div class="ph-now">\u2190 NOW</div>':'')+'<div class="ph-label" style="color:'+p.color+'">'+p.label+'</div><div class="ph-title">'+p.title+'</div><div class="ph-bar"><div class="ph-fill" style="width:'+p.pct+'%;background:'+p.color+'"></div></div><div class="ph-count">'+p.done+'/'+p.total+(p.pct===100?" \u2713":"")+'</div></div>';});
+  h+='</div>';
+  h+='<div class="sec">Quick Access <span></span></div><div class="nav-grid">';
+  h+='<div class="nav-card" onclick="go(\'zoom\')"><span class="nav-icon">\u{1F52D}</span><div class="nav-name">Roadmap</div><div class="nav-desc">Why each phase</div></div>';
+  h+='<div class="nav-card" onclick="go(\'library\');libTab=\'reviews\';render()"><span class="nav-icon">\u{1F4CB}</span><div class="nav-name">Weekly Reviews</div><div class="nav-desc">Reflect & recalibrate</div></div>';
+  h+='<div class="nav-card" onclick="go(\'library\');libTab=\'sops\';render()"><span class="nav-icon">\u{1F4C4}</span><div class="nav-name">SOPs</div><div class="nav-desc">Your playbooks</div></div>';
+  h+='<div class="nav-card" onclick="go(\'library\');libTab=\'prompts\';render()"><span class="nav-icon">\u{1F4AC}</span><div class="nav-name">Prompts</div><div class="nav-desc">Best prompts saved</div></div>';
+  h+='<div class="nav-card" onclick="go(\'library\');libTab=\'tools\';render()"><span class="nav-icon">\u{1F511}</span><div class="nav-name">Tool Logins</div><div class="nav-desc">Quick reference</div></div>';
+  h+='<div class="nav-card" onclick="go(\'blueprint\')"><span class="nav-icon">\u{1F916}</span><div class="nav-name">Blueprint</div><div class="nav-desc">13-step pipeline</div></div>';
+  h+='<div class="nav-card" onclick="go(\'brief\')"><span class="nav-icon">\u{1F52E}</span><div class="nav-name">Brief AI</div><div class="nav-desc">Claude continuity</div></div>';
+  h+='<div class="nav-card" onclick="go(\'tracker\')"><span class="nav-icon">\u{1F9E0}</span><div class="nav-name">Tracker</div><div class="nav-desc">All '+d.tot+' steps</div></div>';
+  h+='</div>'+pipeH();
+  document.getElementById("dashboard").innerHTML=h;
+}
+
+// ===== RENDER: ZOOM =====
+function renderZoom(){
+  const d=calc(),c=d.cur;
+  let h='<div class="zo-mission"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#818cf8;margin-bottom:4px">The Mission</div><div style="font-size:16px;font-weight:600;color:#e0e7ff;line-height:1.5;margin-bottom:6px">Build a fully autonomous AI-powered web agency. Find leads, reach out, close, build, support \u2014 without you in the loop.</div><div style="font-size:12px;color:#8B9FD8">100+ sites/year \u00D7 $2,850\u2013$7,000 = <span style="color:#4ade80;font-weight:600">$285K\u2013$700K+</span></div></div>';
+  h+='<div class="zo-flow"><span class="zo-chip">Metalearning</span><span class="zo-arrow">\u2192</span><span class="zo-chip">Deliver faster</span><span class="zo-arrow">\u2192</span><span class="zo-chip">Find leads at scale</span><span class="zo-arrow">\u2192</span><span class="zo-chip">Automate everything</span><div class="zo-note">Each phase unlocks the next. Ultralearning: directness \u2014 learn by doing.</div></div>';
+  h+='<div class="sec">Full Roadmap <span></span></div>';
+  PM.forEach(function(m){
+    const ps=STEPS.filter(function(s){return s.p===m.id;}),pd=ps.filter(function(s){return gS(s.s)==="done";}).length,n=c.p===m.id;
+    h+='<div class="rp-phase"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;position:relative"><div class="rp-dot" style="background:'+m.color+'">'+m.id+'</div><span class="rp-tag" style="background:'+m.color+'20;color:'+m.color+'">'+m.label+'</span><span class="rp-title">'+m.title+'</span>'+(n?'<span style="font-size:8px;font-weight:700;background:#4f46e530;color:#a5b4fc;padding:2px 6px;border-radius:3px">NOW</span>':'')+'<span style="font-size:10px;color:#52525b;margin-left:auto">'+pd+'/'+ps.length+'</span></div><div class="rp-why">'+WHYS[m.id]+'</div><div>';
+    ps.forEach(function(s){h+=stepRow(s,true);});
+    h+='</div><div class="rp-success">\u{1F3AF} <strong>'+WINS[m.id]+'</strong></div></div>';
+  });
+  h+='<div class="remember"><div style="font-size:12px;color:#47CD89;font-weight:600;margin-bottom:3px">\u{1F4A1} Remember</div><div style="font-size:11px;color:#a1a1aa;line-height:1.7">Every step has "Done =". Ultralearning = retrieval over recognition. Prove mastery, don\'t just check boxes.</div></div>';
+  h+='<div style="margin-top:16px">'+pipeH()+'</div>';
+  document.getElementById("zoom").innerHTML=h;
+}
+
+// ===== RENDER: TRACKER =====
+function renderTracker(){
+  const d=calc(),c=d.cur;
+  let fl=STEPS.slice();
+  if(trkSearch){const q=trkSearch.toLowerCase();fl=fl.filter(function(s){return s.f.toLowerCase().includes(q);});}
+  if(trkFilter!=="all")fl=fl.filter(function(s){if(trkFilter==="learn")return s.type==="learn";if(trkFilter==="build")return s.type==="build";if(trkFilter==="drill")return s.type==="drill";if(trkFilter==="review")return s.type==="review"||s.type==="checkpoint";if(trkFilter==="todo")return gS(s.s)==="todo";if(trkFilter==="active")return gS(s.s)==="active";if(trkFilter==="done")return gS(s.s)==="done";return true;});
+  let h='<div class="sec">All Steps <span></span><span style="flex:none;color:#a1a1aa;font-weight:500;letter-spacing:0">'+d.done+' done \u00B7 '+d.act+' active \u00B7 '+d.rem+' left</span></div>';
+  h+='<div class="trk-filter"><input class="trk-search" placeholder="\u{1F50D} Search..." value="'+esc(trkSearch)+'" oninput="trkSearch=this.value;renderTracker()">';
+  ["all","todo","active","done","learn","build","drill"].forEach(function(f){h+='<button class="fbtn'+(trkFilter===f?" on":"")+'" onclick="trkFilter=\''+f+'\';renderTracker()">'+({all:"All",todo:"To Do",active:"Active",done:"Done",learn:"\u{1F4DA}",build:"\u{1F527}",drill:"\u{1F501}"}[f])+'</button>';});
+  h+='</div>';
+  h+='<div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">';
+  d.ps.forEach(function(p){h+='<span style="font-size:9px;font-weight:600;padding:2px 8px;border-radius:5px;background:'+p.color+'15;color:'+p.color+';border:1px solid '+p.color+'25">'+p.label+': '+p.done+'/'+p.total+'</span>';});
+  h+='</div><div style="border-radius:10px;border:1px solid #27272a;overflow:hidden"><div class="trk-head"><div>#</div><div>Phase</div><div>Focus</div><div style="text-align:right">Status</div></div>';
+  fl.forEach(function(s){
+    const st=gS(s.s),m=PM[s.p],ic=String(s.s)===String(c.s);
+    h+='<div class="trk-row'+(ic?" cur":"")+'" onclick="expandedStep=expandedStep===\''+s.s+'\'?null:\''+s.s+'\';render()"><div style="font-family:JetBrains Mono,monospace;font-size:11px;font-weight:700;color:'+(ic?"#a5b4fc":"#52525b")+'">'+dn(s.s)+'</div><div style="font-size:8px;font-weight:700;color:'+m.color+'">'+m.label+'</div><div style="font-size:11px;font-weight:500;color:'+(st==="done"?"#52525b":"#fafafa")+';text-decoration:'+(st==="done"?"line-through":"none")+';opacity:'+(st==="skip"?.4:1)+'">'+s.f+tTag(s.type)+'</div><div style="text-align:right">'+badge(s.s,ic)+'</div></div>';
+    if(expandedStep===String(s.s)){
+      const note=S.notes[s.s]||"",ts=S.timestamps[s.s]||{};
+      h+='<div class="step-expand">';
+      if(s.desc)h+='<div style="font-size:11px;color:var(--t2);line-height:1.6;padding:10px 12px;background:var(--s);border:1px solid var(--b);border-radius:7px;margin-bottom:8px">'+s.desc+'</div>';
+      h+='<textarea placeholder="Notes..." onblur="setNote(\''+s.s+'\',this.value)">'+esc(note)+'</textarea>';
+      if(s.done)h+='<div class="done-def">\u2705 <strong>Done =</strong> '+s.done+'</div>';
+      if(ts.started)h+='<div style="margin-top:4px;font-size:9px;color:var(--t4)">Started: '+new Date(ts.started).toLocaleString()+'</div>';
+      if(ts.completed)h+='<div style="font-size:9px;color:var(--p3)">Completed: '+new Date(ts.completed).toLocaleString()+'</div>';
+      h+='</div>';
+    }
+  });
+  h+='</div><div style="margin-top:16px">'+pipeH()+'</div>';
+  document.getElementById("tracker").innerHTML=h;
+}
+
+// ===== RENDER: SKILLS =====
+function renderSkills(){
+  const cats=[{k:"concepts",t:"\u{1F4A1} Concepts",sub:"Understand",c:"#a78bfa"},{k:"facts",t:"\u{1F4CC} Facts",sub:"Memorize",c:"#fbbf24"},{k:"procedures",t:"\u2699\uFE0F Procedures",sub:"Practice",c:"#22d3ee"}];
+  let h='<div class="sec">Skill Tree \u2014 Ultralearning Map <span></span></div><p style="font-size:11px;color:var(--t3);margin-bottom:14px;line-height:1.6">Break learning into Concepts (understand), Facts (memorize), Procedures (practice). Add items as you discover them.</p><div class="st-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">';
+  cats.forEach(function(c){
+    h+='<div class="st-col" style="border-top:3px solid '+c.c+'"><h3 style="color:'+c.c+'">'+c.t+'</h3><p style="font-size:9px;color:var(--t3);margin-bottom:8px">'+c.sub+'</p>';
+    (S.skillTree[c.k]||[]).forEach(function(item,i){h+='<div class="st-item">'+esc(item)+'<button class="xb" onclick="S.skillTree.'+c.k+'.splice('+i+',1);save();renderSkills();">\u00D7</button></div>';});
+    h+='<div class="st-add"><input id="sti-'+c.k+'" placeholder="Add..." onkeydown="if(event.key===\'Enter\')addST(\''+c.k+'\')"><button onclick="addST(\''+c.k+'\')">+</button></div></div>';
+  });
+  h+='</div>';
+  document.getElementById("skills").innerHTML=h;
+}
+function addST(k){const i=document.getElementById("sti-"+k),v=i.value.trim();if(!v)return;if(!S.skillTree[k])S.skillTree[k]=[];S.skillTree[k].push(v);i.value="";save();renderSkills();}
+
+// ===== RENDER: LIBRARY (Prompts, SOPs, Reviews, Tools) =====
+function renderLibrary(){
+  let h='<div class="sec">Library <span></span></div>';
+  h+='<div class="subtabs">';
+  [{k:"prompts",l:"\u{1F4AC} Prompts"},{k:"sops",l:"\u{1F4C4} SOPs"},{k:"reviews",l:"\u{1F4CB} Weekly Reviews"},{k:"tools",l:"\u{1F511} Tool Logins"}].forEach(function(t){h+='<button class="subtab'+(libTab===t.k?" on":"")+'" onclick="libTab=\''+t.k+'\';renderLibrary()">'+t.l+'</button>';});
+  h+='</div>';
+
+  if(libTab==="prompts"){
+    h+='<div class="lib-add-form"><div class="modal-label">Add Prompt</div><input class="lib-input" id="prm-title" placeholder="Title (e.g. Homepage hero copy)"><textarea class="lib-textarea" id="prm-content" placeholder="The prompt text..."></textarea><input class="lib-input" id="prm-cat" placeholder="Category (e.g. Website Copy, SEO, Email)"><button class="mbtn primary" style="width:auto;padding:7px 18px" onclick="addPrompt()">Save Prompt</button></div>';
+    (S.prompts||[]).slice().reverse().forEach(function(p,ri){const i=S.prompts.length-1-ri;h+='<div class="lib-card"><div class="lib-actions"><button onclick="delItem(\'prompts\','+i+')">\u{1F5D1}</button></div><h4>'+esc(p.title)+'</h4>'+(p.category?'<span style="font-size:9px;background:var(--cyan)15;color:var(--cyan);padding:2px 6px;border-radius:3px;border:1px solid var(--cyan)25">'+esc(p.category)+'</span>':'')+'<p style="margin-top:6px;white-space:pre-wrap">'+esc(p.content)+'</p><div class="lib-meta">'+p.date+'</div></div>';});
+    if(!(S.prompts||[]).length)h+='<div style="text-align:center;padding:30px;color:var(--t3)">No prompts yet. Save your best ones here.</div>';
+  }
+  else if(libTab==="sops"){
+    h+='<div class="lib-add-form"><div class="modal-label">Add SOP</div><input class="lib-input" id="sop-title" placeholder="Title (e.g. Website Build SOP v1)"><textarea class="lib-textarea" id="sop-content" placeholder="Step-by-step process..." style="min-height:120px"></textarea><button class="mbtn primary" style="width:auto;padding:7px 18px" onclick="addSOP()">Save SOP</button></div>';
+    (S.sops||[]).slice().reverse().forEach(function(p,ri){const i=S.sops.length-1-ri;h+='<div class="lib-card"><div class="lib-actions"><button onclick="editSOP('+i+')">\u270F\uFE0F</button><button onclick="delItem(\'sops\','+i+')">\u{1F5D1}</button></div><h4>'+esc(p.title)+'</h4><p style="white-space:pre-wrap">'+esc(p.content)+'</p><div class="lib-meta">Updated: '+p.date+'</div></div>';});
+    if(!(S.sops||[]).length)h+='<div style="text-align:center;padding:30px;color:var(--t3)">No SOPs yet. Document your processes here.</div>';
+  }
+  else if(libTab==="reviews"){
+    h+='<div class="lib-add-form"><div class="modal-label">Add Weekly Review</div><input class="lib-input" id="rev-title" placeholder="Title (e.g. Week 1 Review)"><textarea class="lib-textarea" id="rev-content" placeholder="What went well? What\'s slower than expected? What needs changing?" style="min-height:120px"></textarea><button class="mbtn primary" style="width:auto;padding:7px 18px" onclick="addReview()">Save Review</button></div>';
+    (S.weeklyReviews||[]).slice().reverse().forEach(function(p,ri){const i=S.weeklyReviews.length-1-ri;h+='<div class="lib-card"><div class="lib-actions"><button onclick="delItem(\'weeklyReviews\','+i+')">\u{1F5D1}</button></div><h4>'+esc(p.title)+'</h4><p style="white-space:pre-wrap">'+esc(p.content)+'</p><div class="lib-meta">'+p.date+' \u00B7 Steps done at time: '+p.stepsDone+'</div></div>';});
+    if(!(S.weeklyReviews||[]).length)h+='<div style="text-align:center;padding:30px;color:var(--t3)">No reviews yet. Write one after each week.</div>';
+  }
+  else if(libTab==="tools"){
+    h+='<div class="lib-add-form"><div class="modal-label">Add Tool</div><input class="lib-input" id="tl-name" placeholder="Tool name (e.g. Make.com)"><input class="lib-input" id="tl-url" placeholder="URL"><input class="lib-input" id="tl-user" placeholder="Username / Email"><input class="lib-input" id="tl-notes" placeholder="Notes (plan, API key location, etc.)"><button class="mbtn primary" style="width:auto;padding:7px 18px" onclick="addTool()">Save Tool</button></div>';
+    (S.toolLogins||[]).slice().reverse().forEach(function(p,ri){const i=S.toolLogins.length-1-ri;h+='<div class="lib-card"><div class="lib-actions"><button onclick="delItem(\'toolLogins\','+i+')">\u{1F5D1}</button></div><h4>'+esc(p.name)+'</h4>'+(p.url?'<p><a href="'+esc(p.url)+'" target="_blank">'+esc(p.url)+'</a></p>':'')+(p.username?'<p>User: <code style="background:var(--bg);padding:1px 5px;border-radius:3px">'+esc(p.username)+'</code></p>':'')+(p.notes?'<p style="color:var(--t3)">'+esc(p.notes)+'</p>':'')+'<div class="lib-meta">Added: '+p.date+'</div></div>';});
+    if(!(S.toolLogins||[]).length)h+='<div style="text-align:center;padding:30px;color:var(--t3)">No tools yet. Track your logins here.</div>';
+  }
+  document.getElementById("library").innerHTML=h;
+}
+function addPrompt(){const t=document.getElementById("prm-title").value.trim(),c=document.getElementById("prm-content").value.trim(),cat=document.getElementById("prm-cat").value.trim();if(!t||!c){alert("Need title and content");return;}if(!S.prompts)S.prompts=[];S.prompts.push({title:t,content:c,category:cat,date:new Date().toISOString().slice(0,10)});save();renderLibrary();}
+function addSOP(){const t=document.getElementById("sop-title").value.trim(),c=document.getElementById("sop-content").value.trim();if(!t||!c){alert("Need title and content");return;}if(!S.sops)S.sops=[];S.sops.push({title:t,content:c,date:new Date().toISOString().slice(0,10)});save();renderLibrary();}
+function editSOP(i){const s=S.sops[i];const nc=prompt("Edit SOP content:",s.content);if(nc!==null){s.content=nc;s.date=new Date().toISOString().slice(0,10);save();renderLibrary();}}
+function addReview(){const t=document.getElementById("rev-title").value.trim(),c=document.getElementById("rev-content").value.trim();if(!t||!c){alert("Need title and content");return;}if(!S.weeklyReviews)S.weeklyReviews=[];const d=calc();S.weeklyReviews.push({title:t,content:c,date:new Date().toISOString().slice(0,10),stepsDone:d.done});save();renderLibrary();}
+function addTool(){const n=document.getElementById("tl-name").value.trim(),u=document.getElementById("tl-url").value.trim(),us=document.getElementById("tl-user").value.trim(),no=document.getElementById("tl-notes").value.trim();if(!n){alert("Need tool name");return;}if(!S.toolLogins)S.toolLogins=[];S.toolLogins.push({name:n,url:u,username:us,notes:no,date:new Date().toISOString().slice(0,10)});save();renderLibrary();}
+function delItem(key,i){if(!confirm("Delete this item?"))return;S[key].splice(i,1);save();renderLibrary();}
+
+// ===== RENDER: BLUEPRINT =====
+function renderBlueprint(){
+  let h='<div class="sec">Autonomous Agency Blueprint \u2014 13 Steps <span></span></div><p style="font-size:11px;color:var(--t3);margin-bottom:16px;line-height:1.6">This is the full vision. Every piece of your AI agency, from lead discovery to upsell. The pipeline colors below show your current progress.</p>';
+  h+='<div style="margin-bottom:20px">'+pipeH()+'</div>';
+  BP_STEPS.forEach(function(b){
+    const pipeIdx=b.n<=12?b.n-1:-1;
+    const status=pipeIdx>=0?{r:"\u{1F534} Not started",y:"\u{1F7E1} Partial",g:"\u{1F7E2} Automated"}[S.pi[pipeIdx]||"r"]:"\u{1F6E1}\uFE0F Monitor";
+    h+='<div class="lib-card"><h4>'+b.icon+' Step '+b.n+': '+b.name+'</h4><p>'+b.desc+'</p><div class="lib-meta">Status: '+status+'</div></div>';
+  });
+  document.getElementById("blueprint").innerHTML=h;
+}
+
+// ===== RENDER: JOURNAL =====
+function renderJournal(){
+  const entries=(S.aiJournal||[]).slice().reverse();
+  let h='<div class="sec">AI Journal \u2014 Continuity Log <span></span></div><p style="font-size:11px;color:var(--t3);margin-bottom:10px;line-height:1.6">Log entries here. AI sessions and you. Tracks how the project evolves.</p>';
+  h+='<div class="lib-add-form"><div class="modal-label">New Entry</div><div style="display:flex;gap:6px;margin-bottom:6px"><input id="aj-auth" class="lib-input" style="width:100px;margin:0" placeholder="Author" value="Dylan"><select id="aj-type" class="lib-input" style="width:110px;margin:0"><option value="human">Human</option><option value="ai">AI Note</option><option value="adaptation">Adaptation</option><option value="milestone">Milestone</option></select></div><textarea id="aj-text" class="lib-textarea" placeholder="What happened? What changed? What should next AI know?"></textarea><button class="mbtn primary" style="width:auto;padding:7px 18px" onclick="addJE()">Add Entry</button></div>';
+  entries.forEach(function(e){
+    const tc={ai:"var(--cyan)",adaptation:"var(--p2)",milestone:"var(--p3)",human:"var(--t2)"}[e.type]||"var(--t2)";
+    h+='<div class="aj-entry"><div class="aj-date">'+e.date+' \u00B7 <span style="color:'+tc+'">'+(e.type||"human")+'</span></div><div class="aj-author">'+esc(e.author)+'</div><div class="aj-text">'+esc(e.text)+'</div></div>';
+  });
+  if(!entries.length)h+='<div style="text-align:center;padding:30px;color:var(--t3)">No entries yet.</div>';
+  document.getElementById("journal").innerHTML=h;
+}
+function addJE(){const a=document.getElementById("aj-auth").value.trim()||"Dylan",t=document.getElementById("aj-type").value,tx=document.getElementById("aj-text").value.trim();if(!tx)return;if(!S.aiJournal)S.aiJournal=[];S.aiJournal.push({date:new Date().toISOString().slice(0,10),author:a,type:t,text:tx});document.getElementById("aj-text").value="";save();renderJournal();}
+
+// ===== RENDER: BRIEF AI =====
+function renderBrief(){
+  const d=calc();
+  // Generate the full briefing text
+  let b="=== ULTRA_AI BRIEFING FOR CLAUDE ===\n";
+  b+="Generated: "+new Date().toISOString().slice(0,16)+"\n\n";
+  b+="## YOUR ROLE\n";
+  b+="You are helping Dylan (CEO of FortX Web, Quebec) with his 60-day AI Ultralearning project.\n";
+  b+="After reading this briefing, you MUST:\n";
+  b+="1. Suggest modifications to upcoming steps if better approaches exist\n";
+  b+="2. Flag any steps that should be adapted based on what's changed\n";
+  b+="3. Update this briefing with your observations and suggestions\n";
+  b+="4. Leave a note in the AI Journal for the NEXT AI session\n\n";
+  b+="## CURRENT PROGRESS\n";
+  b+="Steps done: "+d.done+"/"+d.tot+" ("+d.pct+"%)\n";
+  b+="Current step: "+dn(d.cur.s)+" - "+d.cur.f+"\n";
+  b+="Phase: "+PM[d.cur.p].label+" - "+PM[d.cur.p].title+"\n";
+  b+="Autonomy score: "+d.auto+"%\n\n";
+  b+="## STEP STATUSES\n";
+  STEPS.forEach(function(s){
+    const st=gS(s.s),note=S.notes[s.s];
+    b+=dn(s.s)+" ["+st.toUpperCase()+"] "+s.f+(note?" | Notes: "+note.substring(0,80):"")+"\n";
+  });
+  b+="\n## PIPELINE STATUS\n";
+  PD.forEach(function(p,i){b+=p.n+" "+p.l+": "+{r:"MANUAL",y:"PARTIAL",g:"AUTOMATED"}[S.pi[i]]+"\n";});
+  b+="\n## SKILL TREE\n";
+  ["concepts","facts","procedures"].forEach(function(k){b+=k.toUpperCase()+": "+(S.skillTree[k]||[]).join(", ")+"\n";});
+  b+="\n## TOOLS IN USE\n";
+  (S.toolLogins||[]).forEach(function(t){b+=t.name+(t.url?" ("+t.url+")":"")+(t.notes?" - "+t.notes:"")+"\n";});
+  if(!(S.toolLogins||[]).length)b+="No tools registered yet.\n";
+  b+="\n## RECENT WEEKLY REVIEWS\n";
+  (S.weeklyReviews||[]).slice(-3).forEach(function(r){b+="["+r.date+"] "+r.title+": "+r.content.substring(0,150)+"\n";});
+  if(!(S.weeklyReviews||[]).length)b+="No reviews yet.\n";
+  b+="\n## RECENT AI JOURNAL\n";
+  (S.aiJournal||[]).slice(-5).forEach(function(e){b+="["+e.date+" "+e.author+" "+e.type+"] "+e.text.substring(0,150)+"\n";});
+  b+="\n## PREVIOUS AI SUGGESTIONS\n";
+  b+=(S.claudeBrief.suggestions||"None yet.")+"\n";
+  b+="\n## INSTRUCTIONS FOR YOU (CLAUDE)\n";
+  b+="1. Review all the above context carefully\n";
+  b+="2. Based on my progress, suggest specific modifications to upcoming steps\n";
+  b+="3. If any tools I chose aren't optimal, say so\n";
+  b+="4. If the landscape changed (new tools, new techniques), flag it\n";
+  b+="5. Give me your updated suggestions to paste back into the 'AI Suggestions' box\n";
+  b+="6. Write a journal entry I can paste into the AI Journal\n";
+  b+="7. If you're Claude Code: update the AI-JOURNAL.md in the repo too\n";
+
+  let h='<div class="sec">Brief AI \u2014 Claude Continuity System <span></span></div>';
+  h+='<p style="font-size:11px;color:var(--t3);margin-bottom:14px;line-height:1.6">This generates a full briefing from your dashboard data. Copy it and paste it into any Claude conversation. Claude will review your progress, suggest modifications, and leave notes for the next session.</p>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:12px"><button class="brief-btn" style="background:var(--cyan);color:var(--bg)" onclick="copyBrief()">📋 Copy Full Briefing</button><span id="brief-copied" style="font-size:11px;color:var(--p3);align-self:center"></span></div>';
+  h+='<div class="brief-box" id="brief-text">'+esc(b)+'</div>';
+  h+='<div class="sec" style="margin-top:20px">AI Suggestions <span></span></div>';
+  h+='<p style="font-size:10px;color:var(--t3);margin-bottom:8px">Paste Claude\'s suggestions here so the next briefing includes them:</p>';
+  h+='<textarea class="lib-textarea" id="brief-sug" style="min-height:100px" placeholder="Paste Claude\'s suggestions here after each session...">'+(S.claudeBrief.suggestions||"")+'</textarea>';
+  h+='<button class="mbtn primary" style="width:auto;padding:7px 18px" onclick="saveBriefSug()">Save Suggestions</button>';
+  if(S.claudeBrief.lastUpdated)h+='<div style="font-size:9px;color:var(--t4);margin-top:6px">Last updated: '+S.claudeBrief.lastUpdated+'</div>';
+  document.getElementById("brief").innerHTML=h;
+}
+function copyBrief(){const t=document.getElementById("brief-text").textContent;navigator.clipboard.writeText(t);document.getElementById("brief-copied").textContent="\u2713 Copied!";setTimeout(function(){document.getElementById("brief-copied").textContent="";},2000);}
+function saveBriefSug(){S.claudeBrief.suggestions=document.getElementById("brief-sug").value;S.claudeBrief.lastUpdated=new Date().toISOString().slice(0,16);save();alert("Saved!");}
+
+// ===== SETTINGS =====
+function openSettings(){
+  document.getElementById("settingsOverlay").classList.add("on");
+  const t=getT(),g=getG(),con=!!(t&&g);
+  let h='<h2>\u2699\uFE0F Settings <button onclick="closeSettings()">\u2715</button></h2>';
+  h+='<div class="modal-section"><div class="modal-label">\u2601\uFE0F Cloud Sync (GitHub Gist)</div>';
+  if(con){
+    h+='<div style="padding:8px 12px;background:#14532d30;border:1px solid #14532d;border-radius:6px;margin-bottom:6px;font-size:11px;color:#86efac">\u2705 Connected</div>';
+    h+='<div class="modal-note">Gist ID (for other devices):</div><div class="copy-area" onclick="navigator.clipboard.writeText(\''+g+'\')">'+g+'</div>';
+    h+='<button class="mbtn sec" onclick="cloudSave().then(function(){alert(\'Synced!\')})">Sync Now</button>';
+    h+='<button class="mbtn sec" onclick="if(confirm(\'Disconnect?\')){localStorage.removeItem(\'ultra-gh-token\');localStorage.removeItem(\'ultra-gist-id\');updSync(\'local\');openSettings();}">Disconnect</button>';
+  }else{
+    h+='<div class="modal-note" style="margin-bottom:6px">Connect to sync data across devices.</div>';
+    h+='<div style="font-size:10px;color:var(--t2);margin-bottom:4px"><a href="https://github.com/settings/tokens/new?scopes=gist&description=Ultra_AI" target="_blank">Create token</a> (gist scope only)</div>';
+    h+='<input class="modal-input" id="st-tok" type="password" placeholder="GitHub token...">';
+    h+='<input class="modal-input" id="st-gid" placeholder="Gist ID (empty = create new)">';
+    h+='<button class="mbtn primary" onclick="doConnect()">Connect</button>';
+  }
+  h+='</div>';
+  h+='<div class="modal-section"><div class="modal-label">\u{1F4CB} Manual Export</div><div class="copy-area" onclick="navigator.clipboard.writeText(this.textContent)">'+btoa(JSON.stringify(S))+'</div></div>';
+  h+='<div class="modal-section"><div class="modal-label">\u{1F4E5} Import</div><textarea class="modal-input" id="impArea" rows="2" placeholder="Paste code..."></textarea><button class="mbtn sec" onclick="impData()">Import</button></div>';
+  h+='<div class="modal-section"><div class="modal-label">\u{1F4BE} File</div><button class="mbtn sec" onclick="expFile()">Download JSON</button><button class="mbtn sec" onclick="document.getElementById(\'fInp\').click()">Upload JSON</button><input type="file" id="fInp" accept=".json" style="display:none" onchange="impFile(event)"></div>';
+  h+='<div class="modal-section"><div class="modal-label">\u26A0\uFE0F Danger</div><button class="mbtn danger" onclick="resetAll()">Reset All</button></div>';
+  document.getElementById("settingsModal").innerHTML=h;
+}
+function closeSettings(){document.getElementById("settingsOverlay").classList.remove("on");}
+function impData(){const v=document.getElementById("impArea").value.trim();if(!v){alert("Paste code");return;}try{const d=JSON.parse(atob(v));if(d.st){S={...S,...d};save();render();closeSettings();alert("Imported!");}else throw 0;}catch(e){alert("Invalid code.");}}
+function expFile(){const b=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="ultra-ai-"+new Date().toISOString().slice(0,10)+".json";a.click();}
+function impFile(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.st){S={...S,...d};save();render();closeSettings();alert("Restored!");}else throw 0;}catch(e){alert("Invalid file.");}};r.readAsText(f);e.target.value="";}
+function resetAll(){if(!confirm("Reset ALL progress?"))return;if(!confirm("Really? Everything to zero."))return;S={st:{},pi:[...DP],notes:{},timestamps:{},skillTree:{concepts:[],facts:[],procedures:[]},aiJournal:[],weeklyReviews:[],prompts:[],sops:[],toolLogins:[],claudeBrief:{lastContext:"",lastUpdated:"",suggestions:""}};save();render();closeSettings();}
+
+// ===== NAVIGATION =====
+function go(id){
+  document.querySelectorAll(".view").forEach(function(v){v.classList.remove("on");});
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("on");});
+  document.getElementById(id).classList.add("on");
+  var tab=document.querySelector('.tab[data-view="'+id+'"]');if(tab)tab.classList.add("on");
+  render();window.scrollTo(0,0);
+}
+document.addEventListener("click",function(e){if(openDD!==null&&!e.target.closest(".badge-wrap")){openDD=null;render();}});
+document.addEventListener("keydown",function(e){
+  if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA"||e.target.tagName==="SELECT")return;
+  if(e.key==="1")go("dashboard");if(e.key==="2")go("zoom");if(e.key==="3")go("tracker");if(e.key==="4")go("skills");if(e.key==="5")go("library");if(e.key==="6")go("blueprint");if(e.key==="7")go("journal");if(e.key==="8")go("brief");
+  if(e.key==="Escape"){closeSettings();openDD=null;expandedStep=null;render();}
+});
+
+function render(){renderDash();renderZoom();renderTracker();renderSkills();renderLibrary();renderBlueprint();renderJournal();renderBrief();}
+
+// ===== INIT =====
+load();render();
+(async function(){if(getT()&&getG()){updSync("saving");const cl=await cloudLoad();if(cl){const cd=Object.values(cl.st||{}).filter(function(v){return v==="done";}).length,ld=Object.values(S.st).filter(function(v){return v==="done";}).length;if(cd>ld){S={...S,...cl};localStorage.setItem("ultra_v3",JSON.stringify(S));render();}}updSync("synced");}})();
+</script>
+</body>
+</html>
